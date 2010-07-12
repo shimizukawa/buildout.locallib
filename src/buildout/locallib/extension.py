@@ -38,13 +38,13 @@ def patch_to_Installer(buildout):
         Installer.base = easy_install.Installer
         easy_install.Installer = Installer
 
-def create_dummy_egglink(base, egg_info):
-    link_name = '%s.egg-link' % egg_info.key
+def create_dummy_egglink(base, name, location):
+    link_name = '%s.egg-link' % name
     link_path = os.path.join(base, link_name)
     if not os.path.exists(link_path):
         logger.info('create dummy egg-link: %s', link_path)
         f = open(link_path, 'wt')
-        f.write(egg_info.location)
+        f.write(location)
         f.write("\n../\n")
         f.close()
     else:
@@ -52,11 +52,12 @@ def create_dummy_egglink(base, egg_info):
         pass
 
 def create_dummy_egginfo(base, name, version):
-    egg_name = '%(name)s-%(version)s.egg' % locals()
+    egg_name = '%(name)s-%(version)s.egg-info' % locals()
     egg_path = os.path.join(base, egg_name)
     if not os.path.exists(egg_path):
-        logger.info('create dummy egg: %s', egg_path)
-        os.makedirs(egg_path)
+        logger.info('create dummy egg-info: %s', egg_path)
+        open(egg_path, 'wt').close() # create empty file.
+
 
 def construct_dummy_infos(buildout):
     # TODO: print warning if newest=true.
@@ -72,22 +73,25 @@ def construct_dummy_infos(buildout):
     else:
         return # buildout secsion has no 'locallibs' key.
 
-    for k,v in locallibs.items():
-        req = pkg_resources.Requirement.parse(v)
+    for key,name in locallibs.items():
+        req = pkg_resources.Requirement.parse(name)
         try:
             info = pkg_resources.get_provider(req)
             # expected package are exist (include no-version-specified).
             # Installer patch make to find this.
             create_dummy_egglink(
                     bo['develop-eggs-directory'],
-                    info)
+                    info.key, info.location)
+            create_dummy_egginfo(
+                    bo['develop-eggs-directory'],
+                    info.key, info.version)
         except pkg_resources.VersionConflict,e:
             # find another version (except no-version-specified).
             create_dummy_egginfo(
                     bo['develop-eggs-directory'],
                     req.key, req.specs[0][1])
         except pkg_resources.DistributionNotFound,e:
-            # maybe user need 'simple installed package' (no egg-info)
+            # maybe using 'simple installed package' (no egg-info extention)
             if not req.specs:
                 raise pkg_resources.ExtractionError("%r expect 'name==version' value format." % req.key)
             create_dummy_egginfo(
