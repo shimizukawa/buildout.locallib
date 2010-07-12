@@ -41,11 +41,15 @@ def patch_to_Installer(buildout):
 def create_dummy_egglink(base, egg_info):
     link_name = '%s.egg-link' % egg_info.key
     link_path = os.path.join(base, link_name)
-    logger.info('create/update dummy egg-link: %s', link_path)
-    f = open(link_path, 'wt')
-    f.write(egg_info.location)
-    f.write("\n../\n")
-    f.close()
+    if not os.path.exists(link_path):
+        logger.info('create dummy egg-link: %s', link_path)
+        f = open(link_path, 'wt')
+        f.write(egg_info.location)
+        f.write("\n../\n")
+        f.close()
+    else:
+        # file was exist. need update?
+        pass
 
 def create_dummy_egginfo(base, name, version):
     egg_name = '%(name)s-%(version)s.egg' % locals()
