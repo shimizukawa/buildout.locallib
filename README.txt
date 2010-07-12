@@ -58,7 +58,7 @@ list eggs dir::
 
    $ rm -R eggs
 
-Now update buildout.cfg to use `buildout.locallib` extension::
+Now update buildout.cfg to use ``buildout.locallib`` extension::
 
    [buildout]
    parts = foo
@@ -90,7 +90,7 @@ site-packages include some libraries, but they are not installed by easy_insttal
    feedparser.py
    ...
 
-write buildout.cfg with `locallibs` key and section::
+write buildout.cfg with ``locallibs`` key and section::
 
    [buildout]
    parts = foo
@@ -106,8 +106,8 @@ write buildout.cfg with `locallibs` key and section::
    [locallibs]
    feedparser = feedparser==4.1
 
-'locallibs' section require `(dummy name) = (pkg name)==(version)` style
-key-value pairs. Then, buildout.locallib create dummy `feedparser-4.1.egg-info`
+``locallibs`` section require ``(dummy name) = (pkg name)==(version)`` style
+key-value pairs. Then, buildout.locallib create dummy ``feedparser-4.1.egg-info``
 into the develop-eggs directory. In this way, setuptools recognizes that a
 'feedparser' is installed and doesn't perform downloading.
 
@@ -150,7 +150,7 @@ Write buildout.cfg with `extensions = buildout.locallib`::
 ToDo
 -----
 * Write tests.
-* cleanup develop-eggs folder functionality.
+* cleanup develop-eggs folder.
 
 
 History
