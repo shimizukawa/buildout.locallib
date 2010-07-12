@@ -2,6 +2,8 @@ from zc.buildout import easy_install
 from distutils.sysconfig import get_python_lib
 import pkg_resources
 import os
+import logging
+logger = logging.getLogger('buildout.locallib')
 
 SP_PATH = get_python_lib()
 
@@ -14,7 +16,7 @@ class Installer(easy_install.Installer):
         # if exist args[5] (is path parameter) or 'path' keyword argument,
         # update path list for including 'site-packages' path.
 
-        #print '### easy_install.Installer hooking ...'
+        logger.debug('easy_install.Installer hooked.')
         if len(args) > 5:
             path = args[5]
         elif kw.get('path') is not None:
@@ -31,14 +33,15 @@ class Installer(easy_install.Installer):
 
 
 def patch_to_Installer(buildout):
-    #print '### easy_install.Installer patching ...'
     if easy_install.Installer != Installer:
+        logger.debug('easy_install.Installer patched')
         Installer.base = easy_install.Installer
         easy_install.Installer = Installer
 
 def create_dummy_egglink(base, egg_info):
     link_name = '%s.egg-link' % egg_info.key
     link_path = os.path.join(base, link_name)
+    logger.info('create/update dummy egg-link: %s', link_path)
     f = open(link_path, 'wt')
     f.write(egg_info.location)
     f.write("\n../\n")
@@ -48,6 +51,7 @@ def create_dummy_egginfo(base, name, version):
     egg_name = '%(name)s-%(version)s.egg' % locals()
     egg_path = os.path.join(base, egg_name)
     if not os.path.exists(egg_path):
+        logger.info('create dummy egg: %s', egg_path)
         os.makedirs(egg_path)
 
 def construct_dummy_infos(buildout):
