@@ -2,6 +2,7 @@ from zc.buildout import easy_install
 from distutils.sysconfig import get_python_lib
 import pkg_resources
 import os
+import sys
 import logging
 logger = logging.getLogger('buildout.locallib')
 
@@ -51,8 +52,11 @@ def create_dummy_egglink(base, name, location):
         # file was exist. need update?
         pass
 
-def create_dummy_egginfo(base, name, version):
-    egg_name = '%(name)s-%(version)s.egg-info' % locals()
+def create_dummy_egginfo(base, name, version=None):
+    if version is None:
+        egg_name = '%(name)s.egg-info' % locals()
+    else:
+        egg_name = '%(name)s-%(version)s.egg-info' % locals()
     egg_path = os.path.join(base, egg_name)
     if not os.path.exists(egg_path):
         logger.info('create dummy egg-info: %s', egg_path)
@@ -73,8 +77,12 @@ def construct_dummy_infos(buildout):
     else:
         return # buildout secsion has no 'locallibs' key.
 
+    locallibs_check = bo.get('locallibs-check', 'true')
+    locallibs_check = locallibs_check.lower() != 'false'
+
     for key,name in locallibs.items():
         req = pkg_resources.Requirement.parse(name)
+        proceeded = False
         try:
             info = pkg_resources.get_provider(req)
             # expected package are exist (include no-version-specified).
@@ -85,18 +93,30 @@ def construct_dummy_infos(buildout):
             create_dummy_egginfo(
                     bo['develop-eggs-directory'],
                     info.key, info.version)
+            proceeded = True
         except pkg_resources.VersionConflict,e:
             # find another version (except no-version-specified).
             create_dummy_egginfo(
                     bo['develop-eggs-directory'],
                     req.key, req.specs[0][1])
+            proceeded = True
         except pkg_resources.DistributionNotFound,e:
             # maybe using 'simple installed package' (no egg-info extention)
-            if not req.specs:
-                raise pkg_resources.ExtractionError("%r expect 'name==version' value format." % req.key)
+            if req.specs:
+                create_dummy_egginfo(
+                        bo['develop-eggs-directory'],
+                        req.key, req.specs[0][1])
+                proceeded = True
+
+        if not proceeded:
+            if locallibs_check:
+                #raise pkg_resources.ExtractionError("%r expect 'name==version' value format." % req.key)
+                raise RuntimeError("Can't load `locallibs` specified package %r by %r" % (req.key, sys.executable))
+
             create_dummy_egginfo(
                     bo['develop-eggs-directory'],
-                    req.key, req.specs[0][1])
+                    req.key)
+            proceeded = True
 
 
 def load(buildout):
