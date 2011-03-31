@@ -119,6 +119,21 @@ a `version` like below::
 
 But, if you omit a version for no-egg-info package, buildout.locallib can't
 recognize package version, then it'll cause DistributionNotFound exception.
+If you want to avoid this exception, you should set `locallibs_check = false`
+in buildout section.
+
+Options
+--------
+locallibs
+   A dictionary mapping package names to skip installing distribution
+   that was installed on python's site-packages directory already.
+   This can be used to specify a set of distribution versions independent
+   of other requirements.
+
+locallibs_check
+   default is 'true'. buildout.locallib check distribution existing on
+   site-packages and raise exception if distribute was not found.
+   If set 'false', skip check.
 
 
 Requirements
@@ -155,6 +170,10 @@ ToDo
 
 History
 -------
+
+0.3.0 (2011-3-31)
+~~~~~~~~~~~~~~~~~~
+* Add: locallibs_check option is now available.
 
 0.2.0 (2010-7-12)
 ~~~~~~~~~~~~~~~~~~

@@ -110,8 +110,11 @@ def construct_dummy_infos(buildout):
 
         if not proceeded:
             if locallibs_check:
-                #raise pkg_resources.ExtractionError("%r expect 'name==version' value format." % req.key)
-                raise RuntimeError("Can't load `locallibs` specified package %r by %r" % (req.key, sys.executable))
+                raise pkg_resources.ExtractionError(
+                    "Can't load `locallibs` specified package %r by %r. " \
+                    "If you using NON-EGGIFY-PACKAGE, you need set " \
+                    "'key = name==version' line format."
+                    % (req.key, sys.executable))
 
             create_dummy_egginfo(
                     bo['develop-eggs-directory'],
