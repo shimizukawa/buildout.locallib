@@ -53,6 +53,8 @@ def create_dummy_egglink(base, name, location):
         pass
 
 def create_dummy_egginfo(base, name, version=None):
+    if not os.path.exists(base):
+        os.makedirs(base)
     if version is None:
         egg_name = '%(name)s.egg-info' % locals()
     else:

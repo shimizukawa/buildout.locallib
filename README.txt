@@ -171,6 +171,10 @@ ToDo
 History
 -------
 
+0.3.1 (2013-8-18)
+~~~~~~~~~~~~~~~~~~
+* Fix: create develop-eggs directory if missing.
+
 0.3.0 (2011-3-31)
 ~~~~~~~~~~~~~~~~~~
 * Add: locallibs_check option is now available.
